@@ -8,21 +8,53 @@ const output=ref('');
 const network=ref('testnet');
 const numTotalAddressGenerated=ref(0);
 const numVanityAddressGenerated=ref(0);
+const startStop=ref('スタート')
 
-function start(){
+let cancel:AbortController|undefined=undefined;
+
+async function vanitygen(){
 	const facade=new symbolSdk.facade.SymbolFacade(network.value);
-	while(true){
-		const privateKey=symbolSdk.PrivateKey.random();
-		// @ts-ignore
-		const keyPair=new facade.constructor.KeyPair(privateKey);
-		const address=facade.network.publicKeyToAddress(keyPair.publicKey);
+	while(cancel!==undefined){
+		const privateKey=symbolSdk
+			.PrivateKey
+			.random();
+		const keyPair=new facade
+			.constructor
+			// @ts-ignore
+			.KeyPair(privateKey);
+		const address=facade
+			.network
+			.publicKeyToAddress(keyPair.publicKey);
 		const addressString=address.toString();
 		if(addressString.endsWith(suffix.value)){
-			output.value+=`{privateKey.toString()}\t{addressString}\n`;
+			const privateKeyString=privateKey.toString();
+			output.value+=`${privateKeyString}\t${addressString}\n`;
 			numVanityAddressGenerated.value+=1;
 		}
 		numTotalAddressGenerated.value+=1;
+		await new Promise<void>(
+			(resolve,_)=>{
+				setTimeout(
+					()=>{
+						resolve();
+					},
+					0,
+				);
+			},
+		);
 	}
+}
+
+function start(){
+	if(cancel!==undefined){
+		cancel.abort();
+		startStop.value='スタート';
+		cancel=undefined;
+		return;
+	}
+	startStop.value='ストップ';
+	cancel=new AbortController();
+	vanitygen();
 }
 
 </script>
@@ -51,7 +83,7 @@ function start(){
 		</div>
 		<div class="m-2">
 			<button class="rounded-xl border-2 border-blue-500 text-blue-500 p-1" @click="start">
-				スタート
+				{{startStop}}
 			</button>
 		</div>
 		<div class="m-2">

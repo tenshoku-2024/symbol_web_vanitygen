@@ -42,6 +42,12 @@ export default defineConfig({
 					import.meta.url,
 				),
 			),
+			'ripemd160':fileURLToPath(
+				new URL(
+					'../../node_modules/ripemd160-a-strengthened-version-of-ripemd/dist/index.js',
+					import.meta.url,
+				),
+			),
 			'@':fileURLToPath(
 				new URL(
 					'./src',
