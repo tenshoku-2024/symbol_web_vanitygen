@@ -1,3 +1,7 @@
+import {Buffer} from 'buffer';
+//import * as cryptoBrowserify from 'crypto-browserify';
+(globalThis as any).Buffer=Buffer as any;
+(globalThis as any).global=globalThis as any;
 
 import {createApp} from 'vue';
 import App from '@/App.vue';

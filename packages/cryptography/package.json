@@ -1,0 +1,15 @@
+{
+	"type":"module",
+	"main":"./src/index.ts",
+	"scripts":{
+		"build":"tsc",
+		"test":"vitest run"
+	},
+	"dependencies":{
+		"buffer":"*"
+	},
+	"devDependencies":{
+		"vitest":"^1.3.0",
+		"typescript":"^5.3.3"
+	}
+}

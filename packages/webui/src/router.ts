@@ -9,7 +9,7 @@ const router=createRouter({
 		{
 			path:'/',
 			name:'index',
-			component:()=>import('@/routes/Unimplemented.vue'),
+			component:()=>import('@/routes/Index.vue'),
 		},
 	],
 });
