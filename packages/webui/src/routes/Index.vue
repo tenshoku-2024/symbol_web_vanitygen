@@ -6,14 +6,66 @@ import symbolSdk from 'symbol-sdk';
 const suffix=ref('');
 const output=ref('');
 const network=ref('testnet');
+const mode=ref('endswith')
 const numTotalAddressGenerated=ref(0);
 const numVanityAddressGenerated=ref(0);
 const startStop=ref('スタート')
 
 let cancel:AbortController|undefined=undefined;
 
+const isDesiredFactory=<any>{
+	endswith:(
+		s:string,
+	)=>{
+		return (
+			address:string,
+		)=>{
+			for(let i=0;i<2;i++){
+				if(address.endsWith(s,address.length-i)){
+					return true;
+				}
+			}
+			return false;
+		};
+	},
+	startswith:(
+		s:string,
+	)=>{
+		return (
+			address:string,
+		)=>{
+			for(let i=0;i<3;i++){
+				if(address.startsWith(s,i)){
+					return true;
+				}
+			}
+			return false;
+		};
+	},
+	indexof:(
+		s:string,
+	)=>{
+		return (
+			address:string,
+		)=>{
+			return address.indexOf(s)>0;
+		};
+	},
+	regex:(
+		s:string,
+	)=>{
+		const re=eval(s)
+		return (
+			address:string,
+		)=>{
+			return address.match(re)!==null;
+		};
+	}
+};
+
 async function vanitygen(){
 	const facade=new symbolSdk.facade.SymbolFacade(network.value);
+	const isDesired=isDesiredFactory[mode.value](suffix.value);
 	while(cancel!==undefined){
 		const privateKey=symbolSdk
 			.PrivateKey
@@ -26,7 +78,7 @@ async function vanitygen(){
 			.network
 			.publicKeyToAddress(keyPair.publicKey);
 		const addressString=address.toString();
-		if(addressString.endsWith(suffix.value)){
+		if(isDesired(addressString)){
 			const privateKeyString=privateKey.toString();
 			output.value+=`${privateKeyString}\t${addressString}\n`;
 			numVanityAddressGenerated.value+=1;
@@ -79,7 +131,14 @@ function start(){
 			</select>
 		</div>
 		<div class="m-2 ">
-			この文字列で終わる:<input v-model="suffix" type="text" class="border-b-2 border-blue-500" />
+			<input v-model="suffix" type="text" class="border-b-2 border-blue-500" />
+			←が
+			<select v-model="mode" class="rounded-xl border-2 border-blue-500 p-1">
+				<option value="endswith">最後のほうに含まれている</option>
+				<option value="startswith">最初のほうに含まれている</option>
+				<option value="indexof">とにかく含まれている</option>
+				<option value="regex">正規表現(/と/でかこむ)</option>
+			</select>
 		</div>
 		<div class="m-2">
 			<button class="rounded-xl border-2 border-blue-500 text-blue-500 p-1" @click="start">
